@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Screen Share - ワードで入室</title>
+    <title>Screen Share Mobile Plus</title>
     <link rel="stylesheet" href="style.css">
-    <!-- ライブラリ読み込み -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
 </head>
@@ -13,30 +12,28 @@
     <div class="container">
         <header>
             <h1>画面共有ルーム</h1>
-            <p id="status">ステータス: 待機中</p>
+            <div id="status" class="status-bar">準備中...</div>
         </header>
 
         <main>
-            <!-- 入力エリア -->
             <div id="setup-area" class="card">
                 <div class="input-group">
-                    <label for="word">ルームワード</label>
-                    <input type="text" id="word" placeholder="例: apple-room">
+                    <label>ルームワード</label>
+                    <input type="text" id="word" placeholder="例: room1">
                 </div>
                 <div class="input-group">
-                    <label for="pin">PIN (4桁の数字)</label>
+                    <label>PIN (数字)</label>
                     <input type="number" id="pin" placeholder="例: 1234">
                 </div>
                 <div class="button-group">
-                    <button id="btn-create" class="btn primary">部屋を作る (親)</button>
-                    <button id="btn-join" class="btn secondary">入室する (子)</button>
+                    <button id="btn-create" class="btn primary">部屋を作る (配信開始)</button>
+                    <button id="btn-join" class="btn secondary">入室する (視聴する)</button>
                 </div>
             </div>
 
-            <!-- ビデオ表示エリア -->
             <div id="video-area" class="card hidden">
-                <video id="remote-video" autoplay playsinline></video>
-                <button id="btn-stop" class="btn danger">終了する</button>
+                <video id="remote-video" autoplay playsinline controls></video>
+                <button onclick="location.reload()" class="btn danger">終了して戻る</button>
             </div>
         </main>
     </div>
