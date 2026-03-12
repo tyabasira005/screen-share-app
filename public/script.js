@@ -13,38 +13,44 @@ let localStream = null;
 
 peer.on('open', (id) => {
     myPeerId = id;
-    statusText.innerText = "準備完了。ワードを入れて「部屋を作る」を押してください";
+    statusText.innerText = "準備完了。ID: " + id;
 });
 
-// --- 【親】配信を始める処理 ---
+// --- 【親】配信開始 ---
 btnCreate.addEventListener('click', () => {
+    // デバッグ用：クリックが反応しているか確認
+    console.log("Create button clicked");
+    
     const word = document.getElementById('word').value;
     const pin = document.getElementById('pin').value;
     if (!word || !pin) return alert("ワードとPINを入力してください");
 
-    statusText.innerText = "画面共有を許可してください...";
+    statusText.innerText = "システムダイアログを確認してください...";
 
-    // Android対策：クリックした瞬間に最優先で画面取得を開始
-    // 音声(audio)はエラーの元になるため必ず false
-    navigator.mediaDevices.getDisplayMedia({ 
-        video: { width: { ideal: 1280 }, height: { ideal: 720 } }, 
+    // Galaxy/Android対策: 音声なし、低遅延呼び出し
+    const constraints = { 
+        video: { displaySurface: "monitor" }, 
         audio: false 
-    })
+    };
+
+    navigator.mediaDevices.getDisplayMedia(constraints)
     .then(stream => {
         localStream = stream;
-        // 画面取得が成功したら、サーバーに部屋作成を通知
         socket.emit('create-room', { word, pin, peerId: myPeerId });
         statusText.innerText = "配信準備完了！子が参加するのを待っています...";
         btnCreate.disabled = true;
         btnJoin.disabled = true;
+        alert("画面取得に成功しました。子が参加するのを待ってください。");
     })
     .catch(err => {
         console.error(err);
-        statusText.innerText = "エラー: " + err.name + "。画面共有が許可されませんでした。";
+        // エラー内容をアラートで表示（これで原因がわかります）
+        alert("エラー発生: " + err.name + "\n" + err.message);
+        statusText.innerText = "エラー: " + err.name;
     });
 });
 
-// 子が入室してきた通知を受け取る（親側）
+// 子が入室してきた通知
 socket.on('start-sharing', (childPeerId) => {
     if (localStream) {
         statusText.innerText = "子が接続しました。映像送信中...";
@@ -52,17 +58,15 @@ socket.on('start-sharing', (childPeerId) => {
     }
 });
 
-// --- 【子】入室する処理 ---
+// --- 【子】入室 ---
 btnJoin.addEventListener('click', () => {
     const word = document.getElementById('word').value;
     const pin = document.getElementById('pin').value;
     if (!word || !pin) return alert("ワードとPINを入力してください");
-    
     socket.emit('join-room', { word, pin, peerId: myPeerId });
     statusText.innerText = "入室確認中...";
 });
 
-// 映像を受信した時の処理（子側）
 peer.on('call', (call) => {
     call.answer();
     call.on('stream', (stream) => {
@@ -73,7 +77,4 @@ peer.on('call', (call) => {
     });
 });
 
-socket.on('error-msg', (msg) => {
-    alert(msg);
-    statusText.innerText = msg;
-});
+socket.on('error-msg', (msg) => alert(msg));
