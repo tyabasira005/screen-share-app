@@ -13,52 +13,51 @@ let localStream = null;
 
 peer.on('open', (id) => {
     myPeerId = id;
-    statusText.innerText = "準備完了。ID: " + id;
+    statusText.innerText = "準備完了。モードを選んで「部屋を作る」を押してください";
 });
 
-// --- 【親】配信開始 ---
-btnCreate.addEventListener('click', () => {
-    // デバッグ用：クリックが反応しているか確認
-    console.log("Create button clicked");
-    
+// --- 【配信者】処理 ---
+btnCreate.addEventListener('click', async () => {
     const word = document.getElementById('word').value;
     const pin = document.getElementById('pin').value;
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+
     if (!word || !pin) return alert("ワードとPINを入力してください");
 
-    statusText.innerText = "システムダイアログを確認してください...";
+    try {
+        statusText.innerText = "配信準備中...";
 
-    // Galaxy/Android対策: 音声なし、低遅延呼び出し
-    const constraints = { 
-        video: { displaySurface: "monitor" }, 
-        audio: false 
-    };
+        if (mode === "screen") {
+            // PCモード：画面共有を試みる
+            localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+        } else {
+            // スマホモード：カメラ映像（外カメラ優先）
+            localStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment" }, 
+                audio: true 
+            });
+        }
 
-    navigator.mediaDevices.getDisplayMedia(constraints)
-    .then(stream => {
-        localStream = stream;
         socket.emit('create-room', { word, pin, peerId: myPeerId });
-        statusText.innerText = "配信準備完了！子が参加するのを待っています...";
+        statusText.innerText = "配信中！子が参加するのを待っています...";
         btnCreate.disabled = true;
         btnJoin.disabled = true;
-        alert("画面取得に成功しました。子が参加するのを待ってください。");
-    })
-    .catch(err => {
+
+    } catch (err) {
         console.error(err);
-        // エラー内容をアラートで表示（これで原因がわかります）
-        alert("エラー発生: " + err.name + "\n" + err.message);
         statusText.innerText = "エラー: " + err.name;
-    });
+        alert("許可されなかったか、この端末ではそのモードは使えません。");
+    }
 });
 
-// 子が入室してきた通知
 socket.on('start-sharing', (childPeerId) => {
     if (localStream) {
-        statusText.innerText = "子が接続しました。映像送信中...";
+        statusText.innerText = "子が接続しました。配信中...";
         peer.call(childPeerId, localStream);
     }
 });
 
-// --- 【子】入室 ---
+// --- 【視聴者】処理 ---
 btnJoin.addEventListener('click', () => {
     const word = document.getElementById('word').value;
     const pin = document.getElementById('pin').value;
@@ -73,7 +72,7 @@ peer.on('call', (call) => {
         remoteVideo.srcObject = stream;
         setupArea.classList.add('hidden');
         videoArea.classList.remove('hidden');
-        statusText.innerText = "受信中";
+        statusText.innerText = "視聴中";
     });
 });
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen Share Mobile Plus</title>
+    <title>Multi-Mode Screen Share</title>
     <link rel="stylesheet" href="style.css">
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>画面共有ルーム</h1>
+            <h1>ストリーミングルーム</h1>
             <div id="status" class="status-bar">準備中...</div>
         </header>
 
@@ -19,21 +19,37 @@
             <div id="setup-area" class="card">
                 <div class="input-group">
                     <label>ルームワード</label>
-                    <input type="text" id="word" placeholder="例: room1">
+                    <input type="text" id="word" placeholder="例: myroom">
                 </div>
                 <div class="input-group">
                     <label>PIN (数字)</label>
                     <input type="number" id="pin" placeholder="例: 1234">
                 </div>
+
+                <!-- モード切替ラジオボタン -->
+                <div class="mode-selector">
+                    <p class="label-title">配信モード選択</p>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="mode" value="camera" checked>
+                            <span>スマホモード<br><small>(カメラ映像)</small></span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="mode" value="screen">
+                            <span>PCモード<br><small>(画面共有)</small></span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="button-group">
-                    <button id="btn-create" class="btn primary">部屋を作る (配信開始)</button>
-                    <button id="btn-join" class="btn secondary">入室する (視聴する)</button>
+                    <button id="btn-create" class="btn primary">部屋を作る (配信者)</button>
+                    <button id="btn-join" class="btn secondary">入室する (視聴者)</button>
                 </div>
             </div>
 
             <div id="video-area" class="card hidden">
                 <video id="remote-video" autoplay playsinline controls></video>
-                <button onclick="location.reload()" class="btn danger">終了して戻る</button>
+                <button onclick="location.reload()" class="btn danger">終了する</button>
             </div>
         </main>
     </div>
