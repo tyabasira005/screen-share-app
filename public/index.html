@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Screen Share - ワードで入室</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- ライブラリ読み込み -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>画面共有ルーム</h1>
+            <p id="status">ステータス: 待機中</p>
+        </header>
+
+        <main>
+            <!-- 入力エリア -->
+            <div id="setup-area" class="card">
+                <div class="input-group">
+                    <label for="word">ルームワード</label>
+                    <input type="text" id="word" placeholder="例: apple-room">
+                </div>
+                <div class="input-group">
+                    <label for="pin">PIN (4桁の数字)</label>
+                    <input type="number" id="pin" placeholder="例: 1234">
+                </div>
+                <div class="button-group">
+                    <button id="btn-create" class="btn primary">部屋を作る (親)</button>
+                    <button id="btn-join" class="btn secondary">入室する (子)</button>
+                </div>
+            </div>
+
+            <!-- ビデオ表示エリア -->
+            <div id="video-area" class="card hidden">
+                <video id="remote-video" autoplay playsinline></video>
+                <button id="btn-stop" class="btn danger">終了する</button>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
